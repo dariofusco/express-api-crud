@@ -1,63 +1,64 @@
 const { PrismaClient } = require("@prisma/client")
 const prisma = new PrismaClient();
 
-const store = (data) => {
-    prisma.post
-        .create({ data })
-        .then((newPost) => {
-            console.log("Nuovo Post creato:", newPost);
-        })
-        .catch((error) => console.error(error));
+const store = async (req, res, next) => {
+
+    const { title, slug, image, content, published, categoryId } = req.body;
+
+    const data = {
+        title,
+        slug,
+        image,
+        content,
+        published,
+        categoryId,
+    }
+
+    try {
+        const post = await prisma.post.create({ data });
+        res.status(200).send(post);
+    } catch (error) {
+        next(error);
+    }
 }
 
-const index = () => {
-    prisma.post
-        .findMany()
-        .then((posts) => {
-            console.log(posts);
-        })
-        .catch((error) => console.error(error));
+const index = async (req, res, next) => {
+    try {
+        const posts = await prisma.post.findMany()
+        res.json(posts);
+    } catch (error) {
+        next(error);
+    }
 }
 
-const show = (slug) => {
-    prisma.post
-        .findUnique({
-            where: { slug },
-            include: {
-                category: true,
-                tags: {
-                    select: {
-                        name: true,
-                    },
-                },
-            },
-        })
-        .then((posts) => {
-            console.log(posts);
-        })
-        .catch((error) => console.error(error));
+const show = async (req, res, next) => {
+    try {
+        const { slug } = req.params;
+        const post = await prisma.post.findUnique({ where: { slug } });
+        res.json(post);
+    } catch (error) {
+        next(error);
+    }
 }
 
-const update = (id, data) => {
-    prisma.post
-        .update({
-            where: { id }, data
-        })
-        .then((postUpdated) => {
-            console.log(postUpdated);
-        })
-        .catch((error) => console.error(error));
+const update = async (req, res, next) => {
+    try {
+        const { slug } = req.params;
+        const post = await prisma.post.update({ where: { slug }, data: req.body });
+        res.json(post);
+    } catch (error) {
+        next(error);
+    }
 }
 
-const destroy = (id) => {
-    prisma.post
-        .delete({
-            where: { id }
-        })
-        .then((postDeleted) => {
-            console.log(postDeleted);
-        })
-        .catch((error) => console.error(error));
+const destroy = async (req, res, next) => {
+    const { slug } = req.params;
+    try {
+        await prisma.post.delete({ where: { slug } });
+        res.json(`Il post ${slug} è stato eliminato.`);
+    } catch (error) {
+        next(error);
+    }
 }
 
 module.exports = {

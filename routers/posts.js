@@ -12,10 +12,10 @@ router.post('/', store);
 
 router.get('/', index);
 
-router.get('/:id', show);
+router.get('/:slug', show);
 
-router.put('/:id', update);
+router.put('/:slug', update);
 
-router.delete('/:id', destroy);
+router.delete('/:slug', destroy);
 
 module.exports = router;
